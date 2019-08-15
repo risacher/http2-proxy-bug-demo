@@ -1,0 +1,24 @@
+{
+  "name": "http2-proxy-bug-demo",
+  "version": "1.0.0",
+  "description": "demonstration of a possible bug in http2-proxy",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/risacher/http2-proxy-bug-demo.git"
+  },
+  "author": "",
+  "license": "unlicense",
+  "bugs": {
+    "url": "https://github.com/risacher/http2-proxy-bug-demo/issues"
+  },
+  "homepage": "https://github.com/risacher/http2-proxy-bug-demo#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "finalhandler": "^1.1.2",
+    "http2-proxy": "^5.0.32"
+  }
+}
