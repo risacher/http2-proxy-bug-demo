@@ -19,6 +19,6 @@
   "dependencies": {
     "express": "^4.17.1",
     "finalhandler": "^1.1.2",
-    "http2-proxy": "^5.0.32"
+    "http2-proxy": "^4.2.15"
   }
 }

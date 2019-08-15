@@ -1,3 +1,4 @@
+const fs = require('fs');
 const express = require('express');
 const http = require('http');
 const http2 = require('http2');
@@ -5,7 +6,6 @@ const proxy = require('http2-proxy');
 const finalhandler = require('finalhandler');
 
 const defaultWebHandler = (err, req, res) => {
-  console.log('cpC');
   if (err) {
     console.error('proxy error', err)
     finalhandler(req, res)(err)
@@ -50,7 +50,26 @@ app.get('/', function (req, res) {
 app.listen(3001);
 
 
-var server = http.createServer({ allowHTTP1: true }).listen(3002);
+var server = http.createServer({ }).listen(80);
 server.on('request', listener);
 
+var https_options;
+var https_server;
 
+config = {
+    serverKey: "/etc/letsencrypt/live/birch.risacher.org/privkey.pem",
+    serverCert: "/etc/letsencrypt/live/birch.risacher.org/fullchain.pem"
+};
+
+function init_https() {
+  https_options = {
+    key: fs.readFileSync(config.serverKey, 'utf8'),
+    cert: fs.readFileSync(config.serverCert, 'utf8')
+  };
+  if (https_server) { https_server.close(); }
+  https_server = http2.createSecureServer(https_options).listen({port:443});
+  https_server.on('request', listener);
+}
+
+
+init_https();
