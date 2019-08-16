@@ -49,7 +49,8 @@ const listener = function (req, res) {
 
 const app = express();
 app.get('/', function (req, res) {
-  res.send("hello world GET\n")
+    console.log("App server recieved a GET request");
+    res.send("hello world GET\n")
 });
 app.listen(httpAppPort);
 
