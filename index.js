@@ -5,6 +5,10 @@ const http2 = require('http2');
 const proxy = require('http2-proxy');
 const finalhandler = require('finalhandler');
 
+const httpAppPort = 3001;
+const httpProxyPort = 3002;
+const http2ProxyPort = 3003;
+
 const defaultWebHandler = (err, req, res) => {
   if (err) {
     console.error('proxy error', err)
@@ -47,18 +51,18 @@ const app = express();
 app.get('/', function (req, res) {
   res.send("hello world GET\n")
 });
-app.listen(3001);
+app.listen(httpAppPort);
 
 
-var server = http.createServer({ }).listen(80);
+var server = http.createServer({ }).listen(httpProxyPort);
 server.on('request', listener);
 
 var https_options;
 var https_server;
 
 config = {
-    serverKey: "/etc/letsencrypt/live/birch.risacher.org/privkey.pem",
-    serverCert: "/etc/letsencrypt/live/birch.risacher.org/fullchain.pem"
+    serverKey: "localhost-privkey.pem",
+    serverCert: "localhost-cert.pem"
 };
 
 function init_https() {
@@ -67,7 +71,7 @@ function init_https() {
     cert: fs.readFileSync(config.serverCert, 'utf8')
   };
   if (https_server) { https_server.close(); }
-  https_server = http2.createSecureServer(https_options).listen({port:443});
+  https_server = http2.createSecureServer(https_options).listen({port:http2ProxyPort});
   https_server.on('request', listener);
 }
 

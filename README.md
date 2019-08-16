@@ -5,13 +5,13 @@ demonstration of a possible bug in http2-proxy
 
 2. runs a http proxy port 3002 that proxies requests to port 3001.
 
-3. runs a http2 proxy on port 443 that proxies requests to port 3001.
+3. runs a http2 proxy on port 3003 that proxies requests to port 3001.
 
 With http2-proxy version 4.2.15, the proxy works:
 
 curl http://localhost:3001/
 curl http://localhost:3002/
-curl https://birch.risacher.org/ (the FQDN of the test server)
+curl -k https://localhost:3003/
 
 all respond with "hello world GET"
 

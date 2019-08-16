@@ -4,14 +4,14 @@
   "description": "demonstration of a possible bug in http2-proxy",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon --delay 1500ms --signal SIGTERM"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/risacher/http2-proxy-bug-demo.git"
   },
-  "author": "",
-  "license": "unlicense",
+  "author": "Dan Risacher",
+  "license": "Unlicense",
   "bugs": {
     "url": "https://github.com/risacher/http2-proxy-bug-demo/issues"
   },
@@ -19,6 +19,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "finalhandler": "^1.1.2",
-    "http2-proxy": "^4.2.15"
+    "http2-proxy": "^5.0.32",
+    "nodemon": "^1.19.1"
   }
 }
