@@ -97,7 +97,8 @@ config = {
 function init_https() {
   https_options = {
     key: fs.readFileSync(config.serverKey, 'utf8'),
-    cert: fs.readFileSync(config.serverCert, 'utf8')
+    cert: fs.readFileSync(config.serverCert, 'utf8'),
+    allowHTTP1: true
   };
   if (https_server) { https_server.close(); }
   https_server = http2.createSecureServer(https_options).listen({port:http2ProxyPort});
