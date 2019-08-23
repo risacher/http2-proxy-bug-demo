@@ -21,5 +21,16 @@ But my slightly-more complicated proxy server does not always work fine:
 
 node 10 always works with http2-proxy 4.2.15 and 5.0.34 (if allowHTTP1: true is set)
 
-node 12 works with http2-proxy 4.2.15, but DOES NOT WORK with 5.0.34, even with allowHTTP1 set.
+node 12 works with http2-proxy 4.2.15, but DOES NOT WORK with 5.0.34, even with allowHTTP1 set.  specifically, proxied wss connections hang up.  I'm not sure if it's the browser socket that hangs up or the backend socket.
 
+```
+s proxy error Error: socket hang up
+    at connResetException (internal/errors.js:559:14)
+    at Socket.socketOnEnd (_http_client.js:433:23)
+    at Socket.emit (events.js:208:15)
+    at Socket.EventEmitter.emit (domain.js:476:20)
+    at endReadableNT (_stream_readable.js:1168:12)
+    at processTicksAndRejections (internal/process/task_queues.js:77:11) {
+  code: 'ECONNRESET',
+  statusCode: 502
+  ```
