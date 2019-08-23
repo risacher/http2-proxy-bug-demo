@@ -35,6 +35,7 @@ const route = function (req) {
 	path: req.url,
 	protocol: 'http:',
     }
+    target.path = target.path.replace(/^\/alternate/, '');
     return target;
 }
 
@@ -57,9 +58,10 @@ const listener = function (req, res) {
 }
 
 const upgrade = function (req, socket, head) {
-  var target = route(req);
+    var target = route(req);
+    console.log('REQ', req.headers, req.url);
     if (null != target) {
-        console.log(target);
+        console.log('TARGET', target);
       proxy.ws(req, socket, head, target, defaultWSHandler);
   } else {
     socket.close()
