@@ -31,7 +31,7 @@ const route = function (req) {
 	method: req.method,
 	host: "localhost",
 	hostname: "localhost",
-	port: 3001,
+	port: httpAppPort,
 	path: req.url,
 	protocol: 'http:',
     }
