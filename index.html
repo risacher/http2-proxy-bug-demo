@@ -1,0 +1,20 @@
+<html>
+<head> 
+<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+<p>Hello sockettest</P>
+<div id="log">log</div>
+</body>
+<script>
+  var socket = io({transports:['websocket']});
+  socket.on('connect', ()=> {
+    if (socket.io.engine.transport.polling) {
+      document.querySelector('#log').innerHTML= "Connected, but polling";
+    } else {
+      document.querySelector('#log').innerHTML= "Connected, and not polling!";
+    }
+  }
+  ); 
+</script>
+</html>

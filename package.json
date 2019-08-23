@@ -18,8 +18,9 @@
   "homepage": "https://github.com/risacher/http2-proxy-bug-demo#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "socket.io": "^2.2.0",
     "finalhandler": "^1.1.2",
-    "http2-proxy": "^5.0.32",
+    "http2-proxy": "^5.0.34",
     "nodemon": "^1.19.1"
   }
 }

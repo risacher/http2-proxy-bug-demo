@@ -3,6 +3,7 @@ const express = require('express');
 const http = require('http');
 const http2 = require('http2');
 const proxy = require('http2-proxy');
+const socketio = require('socket.io');
 const finalhandler = require('finalhandler');
 
 const httpAppPort = 3001;
@@ -11,24 +12,33 @@ const http2ProxyPort = 3003;
 
 const defaultWebHandler = (err, req, res) => {
   if (err) {
-    console.error('proxy error', err)
+    console.error('web proxy error', err)
     finalhandler(req, res)(err)
   }
 }
 
+const defaultWSHandler = (err, req, socket, head) => {
+  if (err) {
+    console.error('ws proxy error', err)
+    socket.destroy()
+  }
+}
+
+
 const route = function (req) {
+//    console.log(req);
     var target = {
+	method: req.method,
 	host: "localhost",
 	hostname: "localhost",
 	port: 3001,
-	path: '/',
-	protocol: 'http',
+	path: req.url,
+	protocol: 'http:',
     }
     return target;
 }
 
 const listener = function (req, res) {
-  
     var target = route(req);
     proxy.web(req, res,
               { 
@@ -37,9 +47,8 @@ const listener = function (req, res) {
                       options.hostname = target.hostname;
                       options.port = target.port;
                       options.path = target.path;
-                      options.protocol = target.protocol+':';
-                      
-                      var r = (target.protocol === 'http')?
+                      options.protocol = target.protocol;
+                      var r = (target.protocol === 'http:')?
 			  http.request(options)
 			  : https.request(options);
                       return r;
@@ -47,16 +56,35 @@ const listener = function (req, res) {
               }, defaultWebHandler );
 }
 
+const upgrade = function (req, socket, head) {
+  var target = route(req);
+    if (null != target) {
+        console.log(target);
+      proxy.ws(req, socket, head, target, defaultWSHandler);
+  } else {
+    socket.close()
+  }
+};
+
+
 const app = express();
 app.get('/', function (req, res) {
     console.log("App server recieved a GET request");
-    res.send("hello world GET\n")
+    res.sendFile(__dirname + '/index.html');
 });
-app.listen(httpAppPort);
+
+var appServer = http.createServer(app);
+appServer.listen(httpAppPort);
+var io = socketio(appServer);
+
+io.on('connection', function(socket){
+    console.log('a user connected');
+});
 
 
 var server = http.createServer({ }).listen(httpProxyPort);
 server.on('request', listener);
+server.on('upgrade', upgrade);
 
 var https_options;
 var https_server;
@@ -74,6 +102,7 @@ function init_https() {
   if (https_server) { https_server.close(); }
   https_server = http2.createSecureServer(https_options).listen({port:http2ProxyPort});
   https_server.on('request', listener);
+  https_server.on('upgrade', upgrade);
 }
 
 
