@@ -15,13 +15,13 @@ With http2-proxy version 4.2.15, and node 10.x, the proxy works:
 
  https://localhost:3003/ - the http2->http proxied app works.  allowHTTP1:true is absolutely required.
 
-With http2-proxy version 5.0.34 and node 12.x, everything still works. 
+With http2-proxy version 5.0.34 and node 12.x, this demo still works. 
 
 But my slightly-more complicated proxy server does not always work fine:
 
 node 10 always works with http2-proxy 4.2.15 and 5.0.34 (if allowHTTP1: true is set)
 
-node 12 works with http2-proxy 4.2.15, but DOES NOT WORK with 5.0.34, even with allowHTTP1 set.  specifically, proxied wss connections hang up.  I'm not sure if it's the browser socket that hangs up or the backend socket.
+node 12 works with http2-proxy 4.2.15, but DOES NOT WORK with 5.0.34, even with allowHTTP1 set.  specifically, proxied wss connections hang up.  I'm not sure if it's the browser socket that hangs up or the backend socket.  I think, based on the below error, that  it's the backend socket (because the error happens in `_http_client.js`)
 
 ```
 s proxy error Error: socket hang up
