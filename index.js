@@ -1,4 +1,6 @@
 const fs = require('fs');
+const url = require('url');
+const WebSocketServer = require('ws').Server;
 const express = require('express');
 const http = require('http');
 const http2 = require('http2');
@@ -68,6 +70,9 @@ const upgrade = function (req, socket, head) {
   }
 };
 
+//
+// TINY LITTLE APP SERVER
+//
 
 const app = express();
 app.get('/', function (req, res) {
@@ -75,13 +80,46 @@ app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
 
-var appServer = http.createServer(app);
-appServer.listen(httpAppPort);
-var io = socketio(appServer);
-
-io.on('connection', function(socket){
-    console.log('a user connected');
+const appServer = http.createServer(app);
+const wss = new WebSocketServer({
+   noServer: true
 });
+
+wss.on('connection', (ws) => {
+  ws.send('hello');
+
+  ws.on('message', (data) => {
+    ws.send('message received: ', data);
+  });
+  ws.on('close', () => {
+    console.log('socket closed');
+  });
+});
+
+appServer.on('request', function (req, resp) {
+    console.log('appserver request to '+req.url);
+});
+appServer.on('upgrade', function upgrade(request, socket, head) {
+  const pathname = url.parse(request.url).pathname;
+
+  if (pathname === '/socketEndpoint') {
+    wss.handleUpgrade(request, socket, head, function done(ws) {
+      wss.emit('connection', ws, request);
+    });
+  } else {
+    socket.destroy();
+  }
+});
+
+appServer.listen(httpAppPort);
+
+
+
+//var io = socketio(appServer);
+
+//io.on('connection', function(socket){
+//    console.log('a user connected');
+//});
 
 
 var server = http.createServer({ }).listen(httpProxyPort);

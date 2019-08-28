@@ -1,6 +1,6 @@
 <html>
 <head> 
-<script src="/socket.io/socket.io.js"></script>
+<!--script src="/socket.io/socket.io.js"></script-->
 </head>
 <body>
 <p>Hello sockettest</P>
@@ -8,19 +8,39 @@
 </body>
 <script>
 
-  var parts = document.location.pathname.split('/')                                                 
-  , base = parts.slice(0, parts.length - 1).join('/') + '/'                                         
-  , resource = base + 'socket.io';                                                                  
-  var socket = io.connect(window.location.origin, { path: resource, transports: ['websocket'] });                                
+var endpoint = document.location.origin+
+  (document.location.pathname.split('/').slice(0,-1).join('/')+'/socketEndpoint')
 
+endpoint = endpoint.replace(/^http/,'ws');
+
+document.endpoint = endpoint;
+
+var connection = new WebSocket(endpoint);
+
+connection.onopen = function () {
+  document.querySelector('#log').innerHTML += " Connected. ";
+
+  connection.send('hello from client');
+};
+ 
+// Log errors
+connection.onerror = function (error) {
+  console.error('WebSocket Error ' + error);
+};
+
+// Log messages from the server
+connection.onmessage = function (e) {
+  document.querySelector('#log').innerHTML += (" Message: " + e.data);
+}; 
+  
 //  var socket = io({transports:['websocket']});
-  socket.on('connect', ()=> {
-    if (socket.io.engine.transport.polling) {
-      document.querySelector('#log').innerHTML= "Connected, but polling";
-    } else {
-      document.querySelector('#log').innerHTML= "Connected, and not polling!";
-    }
-  }
-  ); 
+//  socket.on('connect', ()=> {
+//    if (socket.io.engine.transport.polling) {
+//      document.querySelector('#log').innerHTML= "Connected, but polling";
+//    } else {
+//      document.querySelector('#log').innerHTML= "Connected, and not polling!";
+//    }
+//  }
+//  ); 
 </script>
 </html>

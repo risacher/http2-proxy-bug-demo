@@ -20,7 +20,7 @@
     "express": "^4.17.1",
     "socket.io": "^2.2.0",
     "finalhandler": "^1.1.2",
-    "http2-proxy": "^5.0.34",
+    "http2-proxy": "https://github.com/nxtedition/node-http2-proxy.git",
     "nodemon": "^1.19.1"
   }
 }
