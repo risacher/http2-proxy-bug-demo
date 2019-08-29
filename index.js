@@ -28,7 +28,7 @@ const defaultWSHandler = (err, req, socket, head) => {
 
 
 const route = function (req) {
-//    console.log(req);
+    //    console.log(req);
     var target = {
 	method: req.method,
 	host: "localhost",
@@ -37,38 +37,70 @@ const route = function (req) {
 	path: req.url,
 	protocol: 'http:',
     }
-    target.path = target.path.replace(/^\/alternate/, '');
+    target.path = target.path.replace(/^\/alt/, '');
     return target;
 }
 
 const listener = function (req, res) {
     var target = route(req);
-    proxy.web(req, res,
-              { 
-                  onReq: (req, options) => {
-                      options.host = target.host;                  
-                      options.hostname = target.hostname;
-                      options.port = target.port;
-                      options.path = target.path;
-                      options.protocol = target.protocol;
-                      var r = (target.protocol === 'http:')?
-			  http.request(options)
-			  : https.request(options);
-                      return r;
-                  },
-              }, defaultWebHandler );
+    proxy.web(req, res, {
+        onReq: (req, options) => {
+            options.host = target.host;                  
+            options.hostname = target.hostname;
+            options.port = target.port;
+            options.path = target.path;
+	    //                      options.protocol = target.protocol;
+            var r = (target.protocol.match(/^(http|ws):?$/))?
+		http.request(options)
+		: https.request(options);
+            return r;
+        },
+    }, defaultWebHandler );
 }
 
-const upgrade = function (req, socket, head) {
+const upgrade1 = function (req, socket, head) {
+//    console.log('UPGRADE REQ', req.headers, req.url);
     var target = route(req);
-    console.log('REQ', req.headers, req.url);
+//    target.protocol = target.protocol.replace(/^http/, 'ws');
     if (null != target) {
-        console.log('TARGET', target);
-      proxy.ws(req, socket, head, target, defaultWSHandler);
+	target.headers = req.headers;
+        console.log('UPGRADE TARGET', target);
+	proxy.ws(req, socket, head, target, defaultWSHandler);
   } else {
     socket.close()
   }
 };
+
+const upgrade2 = function (req, socket, head) {
+//    console.log('UPGRADE REQ', req.headers, req.url);
+    var target = route(req);
+    target.protocol = target.protocol.replace(/^http/, 'ws');
+    if (null != target) {
+        console.log('UPGRADE TARGET', target);
+	proxy.ws(req, socket, head, {
+	    onReq: (req, options) => {
+                options.host = target.host;                  
+                options.hostname = target.hostname;
+                options.port = target.port;
+                options.path = target.path;
+		//                options.protocol = target.protocol;
+		console.log('UPGRADE OPTIONS', options);		
+                var r = (target.protocol.match(/^(http|ws):?$/))?
+		    http.request(options)
+		    : https.request(options);
+                return r;
+	    }
+	}, defaultWSHandler);
+  } else {
+    socket.close()
+  }
+};
+
+var which = upgrade2; 
+var upgrade = function () { 
+    which = (which == upgrade1)?upgrade2:upgrade1;
+    return which(...arguments);
+}
 
 //
 // TINY LITTLE APP SERVER
@@ -82,33 +114,34 @@ app.get('/', function (req, res) {
 
 const appServer = http.createServer(app);
 const wss = new WebSocketServer({
-   noServer: true
+    noServer: true
 });
 
 wss.on('connection', (ws) => {
-  ws.send('hello');
-
-  ws.on('message', (data) => {
-    ws.send('message received: ', data);
-  });
-  ws.on('close', () => {
-    console.log('socket closed');
-  });
+    ws.send('hello');
+    
+    ws.on('message', (data) => {
+	ws.send(`message received: "${data}"`);
+    });
+    ws.on('close', () => {
+	console.log('socket closed');
+    });
 });
 
 appServer.on('request', function (req, resp) {
     console.log('appserver request to '+req.url);
 });
-appServer.on('upgrade', function upgrade(request, socket, head) {
-  const pathname = url.parse(request.url).pathname;
 
-  if (pathname === '/socketEndpoint') {
-    wss.handleUpgrade(request, socket, head, function done(ws) {
-      wss.emit('connection', ws, request);
-    });
-  } else {
-    socket.destroy();
-  }
+appServer.on('upgrade', function upgrade(request, socket, head) {
+    const pathname = url.parse(request.url).pathname;
+    
+    if (pathname === '/socketEndpoint') {
+	wss.handleUpgrade(request, socket, head, function done(ws) {
+	    wss.emit('connection', ws, request);
+	});
+    } else {
+	socket.destroy();
+    }
 });
 
 appServer.listen(httpAppPort);
